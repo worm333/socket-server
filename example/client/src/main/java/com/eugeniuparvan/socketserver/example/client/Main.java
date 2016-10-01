@@ -39,48 +39,52 @@ public class Main {
         System.out.println("The client has been started. Type: help, to see available commands");
 
         while (true) {
-            String command = input.nextLine();
-            switch (command) {
-                case "help": {
-                    help();
-                    break;
+            try {
+                String command = input.nextLine();
+                switch (command) {
+                    case "help": {
+                        help();
+                        break;
+                    }
+                    case "getRooms": {
+                        getRooms();
+                        break;
+                    }
+                    case "getUsers": {
+                        getUsers();
+                        break;
+                    }
+                    case "sendPrivateMessage": {
+                        sendPrivateMessage();
+                        break;
+                    }
+                    case "sendPublicMessage": {
+                        sendPublicMessage();
+                        break;
+                    }
+                    case "getJoinedRooms": {
+                        getJoinedRooms();
+                        break;
+                    }
+                    case "createRoom": {
+                        createRoom();
+                        break;
+                    }
+                    case "joinRoom": {
+                        joinRoom();
+                        break;
+                    }
+                    case "exitRoom": {
+                        exitRoom();
+                        break;
+                    }
+                    case "stop": {
+                        stop();
+                        break;
+                    }
                 }
-                case "getRooms": {
-                    getRooms();
-                    break;
-                }
-                case "getUsers": {
-                    getUsers();
-                    break;
-                }
-                case "sendPrivateMessage": {
-                    sendPrivateMessage();
-                    break;
-                }
-                case "sendPublicMessage": {
-                    sendPublicMessage();
-                    break;
-                }
-                case "getJoinedRooms": {
-                    getJoinedRooms();
-                    break;
-                }
-                case "createRoom": {
-                    createRoom();
-                    break;
-                }
-                case "joinRoom": {
-                    joinRoom();
-                    break;
-                }
-                case "exitRoom": {
-                    exitRoom();
-                    break;
-                }
-                case "stop": {
-                    stop();
-                    break;
-                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
         }
     }
@@ -116,6 +120,7 @@ public class Main {
     private static void getUsers() {
         System.out.println("What is the room id you want to select users from?");
         long roomId = input.nextLong();
+        input.nextLine();
 
         client.addObserver(new OnUserList() {
             @Override
@@ -135,16 +140,17 @@ public class Main {
     private static void sendPrivateMessage() {
         System.out.println("Type userId you want to send private message to");
         Long userId = input.nextLong();
+        input.nextLine();
 
         System.out.println("Type the message:");
-        String message = input.next();
+        String message = input.nextLine();
 
         client.sendPrivateMessage(userId, message);
     }
 
     private static void sendPublicMessage() {
         System.out.println("Type the message:");
-        String message = input.next();
+        String message = input.nextLine();
 
         client.sendPublicMessage(message);
     }
@@ -170,7 +176,7 @@ public class Main {
         String roomName = input.nextLine();
 
         System.out.println("Write the room password, if you want to make a private room or null, if not");
-        String roomPassword = input.next();
+        String roomPassword = input.nextLine();
 
         client.addObserver(new OnRoomCreated() {
             @Override
@@ -191,9 +197,10 @@ public class Main {
     private static void joinRoom() {
         System.out.println("What room do you like to join? Type the room id:");
         long roomId = input.nextLong();
+        input.nextLine();
 
         System.out.println("Does the room has password? Type the room password or null:");
-        String roomPassword = input.next();
+        String roomPassword = input.nextLine();
 
         OnJoinRoomImpl onJoinRoom = new OnJoinRoomImpl();
         Observer onJoinRoomError = new OnJoinRoomError() {
@@ -216,6 +223,7 @@ public class Main {
     private static void exitRoom() {
         System.out.println("What is the roomId yon want to exit?");
         Long roomId = input.nextLong();
+        input.nextLine();
 
         client.exitRoom(roomId);
         System.out.println("You've been exit from room with id: " + roomId);

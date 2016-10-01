@@ -4,6 +4,7 @@ import com.eugeniuparvan.multiplayer.core.entity.IRoom;
 import com.eugeniuparvan.multiplayer.core.entity.IUser;
 import com.eugeniuparvan.multiplayer.core.entity.Room;
 import org.apache.log4j.Logger;
+import org.springframework.util.StringUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -174,16 +175,13 @@ public class Server implements IServer {
         if (joinedRooms.size() >= maxJoinedRooms || joinedRooms.contains(room))
             return null;
 
-        if (password == null || "".equals(password)) {
+        String pass = roomPassMap.get(room);
+
+        if (StringUtils.isEmpty(pass) || pass.equals(password)) {
             user.joinRoom(room);
             return room;
-        } else {
-            String pass = roomPassMap.get(room);
-            if (password.equals(pass)) {
-                user.joinRoom(room);
-                return room;
-            }
         }
+
         return null;
     }
 

@@ -64,6 +64,8 @@ local.properties
 server/target/**
 core/target/**
 client/target/**
+example/client/target/**
+example/server/target/**
 
 ######################
 # Gradle
