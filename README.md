@@ -39,7 +39,7 @@ add observers to client
             }
         });
 ```
-basically you can add any observer declared in package `com.eugeniuparvan.multiplayer.client.observers`
+basically you can add any observer declared in package `com.eugeniuparvan.multiplayer.client.observers`.
 
 # Sample project
 
