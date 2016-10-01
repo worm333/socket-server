@@ -88,7 +88,7 @@ public class TestBase {
                     next = true;
                 }
             });
-            client.addObserver(new OnMessage() {
+            client.addObserver(new OnPublicMessage() {
                 @Override
                 public void onEvent(IEvent event) {
                     String message = (String) event.getParams().getParam("message").getObject();

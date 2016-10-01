@@ -58,10 +58,10 @@ public class Client implements IClient {
             else
                 logger.info("Shutting down client: Forcing shutdown...");
             executor.shutdownNow();
+            logger.info("client is stopped.");
         } catch (InterruptedException e) {
-            logger.error("TODO: nice message", e);// TODO: nice message
+            logger.error("client is stopped.", e);
         }
-        logger.info("client is stopped.");
     }
 
     @Override

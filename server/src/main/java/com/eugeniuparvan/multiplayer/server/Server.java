@@ -82,11 +82,10 @@ public class Server implements IServer {
             else
                 logger.info("Shutting down the server: Forcing shutdown...");
             executor.shutdownNow();
+            logger.info("Server is stopped.");
         } catch (InterruptedException e) {
-            logger.error("TODO: nice message", e);// TODO: nice message
+            logger.info("Server is stopped");
         }
-
-        logger.info("Server is stopped.");
     }
 
     @Override
@@ -168,10 +167,13 @@ public class Server implements IServer {
 
     @Override
     public IRoom joinRoom(long roomId, IUser user, String password) {
-        int maxJoinedRooms = Integer.parseInt(serverConfig.getProperty(ServerConfig.MAX_JOINED_ROOMS));
-        if (user.getJoinedRooms().size() >= maxJoinedRooms)
-            return null;
         IRoom room = idRoomMap.get(roomId);
+
+        int maxJoinedRooms = Integer.parseInt(serverConfig.getProperty(ServerConfig.MAX_JOINED_ROOMS));
+        Set<IRoom> joinedRooms = user.getJoinedRooms();
+        if (joinedRooms.size() >= maxJoinedRooms || joinedRooms.contains(room))
+            return null;
+
         if (password == null || "".equals(password)) {
             user.joinRoom(room);
             return room;

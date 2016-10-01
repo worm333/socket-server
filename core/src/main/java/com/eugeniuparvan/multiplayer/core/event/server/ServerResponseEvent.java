@@ -15,7 +15,9 @@ public class ServerResponseEvent extends Event {
 
     public static final String ON_JOIN_ROOM_ERROR = "ON_JOIN_ROOM_ERROR";
 
-    public static final String ON_MESSAGE = "ON_MESSAGE";
+    public static final String ON_PUBLIC_MESSAGE = "ON_PUBLIC_MESSAGE";
+
+    public static final String ON_PRIVATE_MESSAGE = "ON_PRIVATE_MESSAGE";
 
     private static final long serialVersionUID = 2052790993186037269L;
 

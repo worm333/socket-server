@@ -107,7 +107,7 @@ public class Connection implements IConnection, Observer {
                     }
                 }
             } catch (IOException e) {
-                logger.fatal("TODO: nice message", e);// TODO: nice message
+                logger.info("Disconnecting user: " + user.getId() + " ....");// TODO: nice message
                 break;
             } catch (Exception e) {
                 logger.error("TODO: nice message", e);// TODO: nice message
@@ -289,9 +289,9 @@ public class Connection implements IConnection, Observer {
 
         EventParams params = new EventParams();
         params.putParam("message", new SerializableObject<>(message));
-
+        params.putParam("user", new SerializableObject<>(user));
         IConnection connection = server.getConnection(userId);
-        connection.sendToClient(new ServerResponseEvent(ServerResponseEvent.ON_MESSAGE, params));
+        connection.sendToClient(new ServerResponseEvent(ServerResponseEvent.ON_PRIVATE_MESSAGE, params));
     }
 
     /**
@@ -304,9 +304,10 @@ public class Connection implements IConnection, Observer {
 
         EventParams params = new EventParams();
         params.putParam("message", new SerializableObject<>(message));
+        params.putParam("user", new SerializableObject<>(user));
 
         Set<IUser> users = getAllUsersFromJoinedRooms(user);
-        IEvent e = new ServerResponseEvent(ServerResponseEvent.ON_MESSAGE, params);
+        IEvent e = new ServerResponseEvent(ServerResponseEvent.ON_PUBLIC_MESSAGE, params);
 
         sendEventToAll(e, users);
     }
@@ -350,7 +351,6 @@ public class Connection implements IConnection, Observer {
         sendOnDisconnectedEvent();
 
         user.disconnect();
-
         server.removeConnection(this);
 
         close(out);
