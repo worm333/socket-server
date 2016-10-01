@@ -160,15 +160,6 @@ public class ClientEventTest extends TestBase {
         pleaseWait();
 
         client_0.sendPrivateMessage(2L, "Private message");
-
-        client_0.stop();
-        client_1.exitRoom(helloWorldRoom.getId());
-        pleaseWait();//waiting onUserExitRoom event for client_2
-
-        client_2.getUsers(helloWorldRoom.getId());
-        pleaseWait();
-        Assert.assertEquals(users.size(), 1);
-        Assert.assertEquals(totalDisconnectionEventRecieved.get(), 2);
     }
 
 }

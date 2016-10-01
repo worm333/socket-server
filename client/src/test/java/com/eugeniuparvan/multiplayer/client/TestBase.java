@@ -13,7 +13,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestBase {
     private final int port = 9090;
@@ -21,7 +20,6 @@ public class TestBase {
     protected volatile Set<IRoom> rooms;
     protected volatile Set<IRoom> joinedRooms;
     protected volatile Set<IUser> users;
-    protected AtomicInteger totalDisconnectionEventRecieved = new AtomicInteger(0);
     private volatile boolean next = false;
     private ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -96,13 +94,6 @@ public class TestBase {
                     String message = (String) event.getParams().getParam("message").getObject();
                     logger.info("User: " + client.getUser().getId() + " received message: '" + message + "'");
                     next = true;
-                }
-            });
-
-            client.addObserver(new OnUserDisconnected() {
-                @Override
-                public void onEvent(IEvent event) {
-                    totalDisconnectionEventRecieved.incrementAndGet();
                 }
             });
 
