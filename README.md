@@ -46,12 +46,12 @@ basically you can add any observer declared in package `com.eugeniuparvan.multip
 Consists of server and client parts.
 
 The client can send the following commands:
-  * getRooms - retieves all avalibale rooms
+  * getRooms - retrieves all avalibale rooms
   * getUsers - retrieves all users in room
   * sendPrivateMessage - sends private message to user
   * sendPublicMessage - sends public message to all users which are located in the same rooms with sender
   * getJoinedRooms - retrieves all rooms joined by user
-  * createRoom - cretes new room
+  * createRoom - creates new room
   * joinRoom - joins the room
   * exitRoom - exists from room
   * stop - stops the client
