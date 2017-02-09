@@ -14,8 +14,6 @@ public class ClientEventTest extends TestBase {
 
     @Test
     public void clientEventTest() throws Exception {
-        startServer();
-
         Client client_0 = getClient();
         client_0.addObserver(new OnJoinRoom() {
             @Override
@@ -140,6 +138,7 @@ public class ClientEventTest extends TestBase {
         Assert.assertEquals(users.size(), 3);
 
         client_0.exitRoom(helloWorldRoom.getId());
+        pleaseWait();//waiting onRoomExit for client_0
         pleaseWait();//waiting onUserExitRoom event for client_1
         pleaseWait();//waiting onUserExitRoom event for client_2
 
@@ -154,12 +153,17 @@ public class ClientEventTest extends TestBase {
 
         client_2.sendPublicMessage("Hi all!_2");
         pleaseWait();
+        pleaseWait();
         client_1.sendPublicMessage("Hi all!_1");
+        pleaseWait();
         pleaseWait();
         client_0.sendPublicMessage("Hi all!_0");
         pleaseWait();
+        pleaseWait();
 
         client_0.sendPrivateMessage(2L, "Private message");
+        pleaseWait();
+
     }
 
 }

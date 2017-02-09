@@ -11,6 +11,8 @@ public interface IServer {
 
     void stop();
 
+    boolean isRunning();
+
     long generateUserId();
 
     long generateRoomId();
@@ -30,6 +32,8 @@ public interface IServer {
     IRoom createRoom(String name);
 
     IRoom createRoom(String name, String password);
+
+    void removeRoom(Long id);
 
     IRoom joinRoom(long roomId, IUser user, String password);
 

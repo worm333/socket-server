@@ -117,8 +117,14 @@ public class Connection implements IConnection, Observer {
     }
 
     @Override
+    public void stop() {
+        releaseResources();
+    }
+
+    @Override
     public void update(Observable observable, Object argument) {
         IUser u;
+        IRoom r;
         IEvent event = (IEvent) argument;
         Set<IUser> users = new HashSet<>();
         switch (event.getType()) {
@@ -130,8 +136,11 @@ public class Connection implements IConnection, Observer {
                 break;
             case RoomNotificationEvent.USER_EXITED_ROOM:
                 u = (IUser) event.getParams().getParam("user").getObject();
+                r = (IRoom) event.getParams().getParam("room").getObject();
                 if (!user.equals(u)) //sends event only if other user has exited the room
                     users.add(user);
+                else if (r.isAutoRemove() && r.getUsers().size() == 0)
+                    server.removeRoom(r.getId());
                 logger.info(event);
                 break;
             case RoomNotificationEvent.ROOM_VARIABLE_UPDATE:
@@ -148,38 +157,18 @@ public class Connection implements IConnection, Observer {
     }
 
     @Override
-    public Socket getSocket() {
-        return socket;
-    }
-
-    @Override
-    public ObjectInputStream getInputStream() {
-        return in;
-    }
-
-    @Override
-    public ObjectOutputStream getOutputStream() {
-        return out;
-    }
-
-    @Override
     public IUser getUser() {
         return user;
-    }
-
-    @Override
-    public IServer gerServer() {
-        return server;
     }
 
     @Override
     public void sendToClient(IEvent event) {
         try {
             out.writeObject(event);
+            out.reset();
         } catch (IOException e) {
-            logger.error("Sending event to client error", e);
+            logger.error("Can't send event:" + event.toString(), e);
         }
-
     }
 
     private void sendOnConnectedEvent() {
@@ -275,7 +264,13 @@ public class Connection implements IConnection, Observer {
      */
     private void exitRoom(IEvent event) {
         Long roomId = (Long) event.getParams().getParam("roomId").getObject();
-        server.exitRoom(roomId, user);
+        IRoom r = server.exitRoom(roomId, user);
+
+        if (r == null)
+            return;
+        EventParams params = new EventParams();
+        params.putParam("room", new SerializableObject<>(r));
+        sendToClient(new ServerResponseEvent(ServerResponseEvent.ON_ROOM_EXIT, params));
     }
 
     /**
@@ -348,14 +343,15 @@ public class Connection implements IConnection, Observer {
 
     private void releaseResources() {
         // TODO: Test this!
-        sendOnDisconnectedEvent();
-
         user.disconnect();
         server.removeConnection(this);
 
+        sendOnDisconnectedEvent();
+
         close(out);
         close(in);
-        close(socket);
+        if (!socket.isClosed())
+            close(socket);
     }
 
     private void close(Closeable closeable) {

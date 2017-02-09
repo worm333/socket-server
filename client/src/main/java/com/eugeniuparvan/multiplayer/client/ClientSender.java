@@ -23,6 +23,7 @@ public class ClientSender implements Runnable {
     public void run() {
         try {
             out.writeObject(event);
+            out.reset();
         } catch (IOException e) {
             logger.error("Sending event error", e);
         }

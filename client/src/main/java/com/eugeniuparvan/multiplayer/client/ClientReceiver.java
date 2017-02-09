@@ -27,7 +27,7 @@ public class ClientReceiver extends Observable implements Runnable {
                 setChanged();
                 notifyObservers(event);
             } catch (IOException e) {
-                logger.fatal("Receiving event fatal error", e);
+                logger.info("Disconnected from server socket.");
                 break;
             } catch (ClassNotFoundException e) {
                 logger.error("Receiving event error", e);

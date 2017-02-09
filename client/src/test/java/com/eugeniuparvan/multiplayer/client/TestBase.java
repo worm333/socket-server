@@ -6,6 +6,8 @@ import com.eugeniuparvan.multiplayer.core.entity.IUser;
 import com.eugeniuparvan.multiplayer.core.event.IEvent;
 import com.eugeniuparvan.multiplayer.server.IServer;
 import com.eugeniuparvan.multiplayer.server.Server;
+import org.junit.After;
+import org.junit.Before;
 
 import java.io.IOException;
 import java.util.Set;
@@ -17,11 +19,23 @@ import java.util.concurrent.Future;
 public class TestBase {
     private final int port = 9090;
     private final String host = "localhost";
+    protected IServer server;
     protected volatile Set<IRoom> rooms;
     protected volatile Set<IRoom> joinedRooms;
     protected volatile Set<IUser> users;
     private volatile boolean next = false;
     private ExecutorService executor = Executors.newCachedThreadPool();
+
+    @Before
+    public void setUp() throws Exception {
+        startServer();
+    }
+
+    @After
+    public void tearDown() {
+        server.stop();
+        while(server.isRunning());
+    }
 
     protected void startServer() throws Exception {
         executor.submit(new ServerThread());
@@ -88,6 +102,14 @@ public class TestBase {
                     next = true;
                 }
             });
+            client.addObserver(new OnRoomExit() {
+                @SuppressWarnings("unchecked")
+                @Override
+                public void onEvent(IEvent event) {
+                    IRoom r = (IRoom) event.getParams().getParam("room").getObject();
+                    next = true;
+                }
+            });
             client.addObserver(new OnPublicMessage() {
                 @Override
                 public void onEvent(IEvent event) {
@@ -97,6 +119,14 @@ public class TestBase {
                 }
             });
 
+            client.addObserver(new OnPrivateMessage() {
+                @Override
+                public void onEvent(IEvent event) {
+                    String message = (String) event.getParams().getParam("message").getObject();
+                    logger.info("User: " + client.getUser().getId() + " received message: '" + message + "'");
+                    next = true;
+                }
+            });
             client.addObserver(new OnUserEnteredRoom() {
                 @Override
                 public void onEvent(IEvent event) {
@@ -131,7 +161,7 @@ public class TestBase {
     private class ServerThread extends Thread {
         public void run() {
             try {
-                IServer server = new Server(port);
+                server = new Server(port);
                 server.start();
             } catch (IOException e) {
 

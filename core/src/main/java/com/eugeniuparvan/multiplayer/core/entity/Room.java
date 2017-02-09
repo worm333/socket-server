@@ -25,7 +25,7 @@ public class Room extends Observable implements IRoom {
 
     private final Boolean autoRemove;
 
-    private ConcurrentMap<IUser, Boolean> users;
+    private ConcurrentMap<Long, IUser> users;
 
     private ConcurrentMap<String, SerializableObject<? extends Serializable>> variables;
 
@@ -60,7 +60,7 @@ public class Room extends Observable implements IRoom {
 
     @Override
     public void addUser(IUser user) {
-        Object object = users.putIfAbsent(user, true);
+        Object object = users.putIfAbsent(user.getId(), user);
         if (object != null)
             return;
         setChanged();
@@ -72,7 +72,7 @@ public class Room extends Observable implements IRoom {
 
     @Override
     public void removeUser(IUser user) {
-        users.remove(user);
+        users.remove(user.getId());
         setChanged();
         IEventParams params = new EventParams();
         params.putParam("room", new SerializableObject<IRoom>(this));
@@ -82,7 +82,7 @@ public class Room extends Observable implements IRoom {
 
     @Override
     public Set<IUser> getUsers() {
-        return users.keySet().stream().collect(Collectors.toSet());
+        return users.values().stream().collect(Collectors.toSet());
     }
 
     @Override

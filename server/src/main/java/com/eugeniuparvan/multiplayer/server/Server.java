@@ -25,13 +25,13 @@ public class Server implements IServer {
 
     private final ServerConfig serverConfig;
 
-    private boolean isRunning;
+    private volatile boolean running;
 
     private ConcurrentMap<IConnection, Boolean> connectionMap;
 
     private ConcurrentMap<Long, IConnection> userIdConnectionMap;
 
-    private ConcurrentMap<IRoom, String> roomPassMap;
+    private ConcurrentMap<Long, String> roomPassMap;
 
     private ConcurrentMap<Long, IRoom> idRoomMap;
 
@@ -39,43 +39,46 @@ public class Server implements IServer {
 
     private AtomicLong roomIndex;
 
+    private ServerSocket serverSocket;
+
     public Server(int port) throws IOException {
         this.port = port;
         this.connectionMap = new ConcurrentHashMap<IConnection, Boolean>();
         this.userIdConnectionMap = new ConcurrentHashMap<Long, IConnection>();
-        this.roomPassMap = new ConcurrentHashMap<IRoom, String>();
+        this.roomPassMap = new ConcurrentHashMap<Long, String>();
         this.idRoomMap = new ConcurrentHashMap<Long, IRoom>();
         this.connectionsIndex = new AtomicLong(-1);
         this.roomIndex = new AtomicLong(-1);
         this.serverConfig = new ServerConfig();
         this.defaultRoom = new Room(generateRoomId(), Room.DEFAULT_NAME, false, false);
-        roomPassMap.putIfAbsent(defaultRoom, "");
+        roomPassMap.putIfAbsent(defaultRoom.getId(), "");
         idRoomMap.putIfAbsent(defaultRoom.getId(), defaultRoom);
     }
 
     @Override
+    public boolean isRunning() {
+        return running;
+    }
+
+    @Override
     public void start() {
-        isRunning = true;
-        ServerSocket serverSocket = null;
+        running = true;
+
         ExecutorService executor = null;
         try {
             serverSocket = new ServerSocket(port);
             executor = Executors.newCachedThreadPool();
 
-            while (isRunning) {
+            while (running) {
                 Socket socket = serverSocket.accept();
-                if (!isRunning)
-                    break;
                 IConnection connection = new Connection(socket, this);
                 executor.submit(connection);
                 connectionMap.putIfAbsent(connection, true);
                 userIdConnectionMap.putIfAbsent(connection.getUser().getId(), connection);
             }
         } catch (IOException e) {
-            logger.fatal("TODO: nice message", e);// TODO: nice message
+            logger.info("Server socket is closed.");
         }
-
-        releaseResources(serverSocket);
 
         try {
             if (executor.awaitTermination(10, TimeUnit.SECONDS))
@@ -87,18 +90,18 @@ public class Server implements IServer {
         } catch (InterruptedException e) {
             logger.info("Server is stopped");
         }
+        releaseResources(serverSocket);
+        running = false;
     }
 
     @Override
     public void stop() {
-        isRunning = false;
         try {
-            Socket socket = new Socket("localhost", port);
-            socket.close();
-        } catch (Exception e) {
-            logger.error("TODO: nice message", e);// TODO: nice message
+            if (!serverSocket.isClosed())
+                serverSocket.close();
+        } catch (IOException e) {
+            logger.error("Failed to close server socket.");
         }
-
     }
 
     @Override
@@ -139,7 +142,7 @@ public class Server implements IServer {
 
     @Override
     public Set<IRoom> getRooms() {
-        return roomPassMap.keySet().stream().collect(Collectors.toSet());
+        return idRoomMap.values().stream().collect(Collectors.toSet());
     }
 
     @Override
@@ -157,13 +160,19 @@ public class Server implements IServer {
         IRoom room = null;
         if (password == null || "".equals(password)) {
             room = new Room(generateRoomId(), name, false, true);
-            roomPassMap.putIfAbsent(room, "");
+            roomPassMap.putIfAbsent(room.getId(), "");
         } else {
             room = new Room(generateRoomId(), name, true, true);
-            roomPassMap.putIfAbsent(room, password);
+            roomPassMap.putIfAbsent(room.getId(), password);
         }
         idRoomMap.putIfAbsent(room.getId(), room);
         return room;
+    }
+
+    @Override
+    public void removeRoom(Long id) {
+        roomPassMap.remove(id);
+        idRoomMap.remove(id);
     }
 
     @Override
@@ -196,10 +205,8 @@ public class Server implements IServer {
 
     private void releaseResources(ServerSocket serverSocket) {
         close(serverSocket);
-        for (IConnection serverThread : connectionMap.keySet()) {
-            close(serverThread.getInputStream());
-            close(serverThread.getOutputStream());
-            close(serverThread.getSocket());
+        for (IConnection connection : connectionMap.keySet()) {
+            connection.stop();
         }
     }
 

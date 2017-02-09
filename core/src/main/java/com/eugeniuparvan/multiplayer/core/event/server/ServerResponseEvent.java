@@ -7,6 +7,8 @@ public class ServerResponseEvent extends Event {
 
     public static final String ON_ROOM_LIST = "ON_ROOM_LIST";
 
+    public static final String ON_ROOM_EXIT = "ON_ROOM_EXIT";
+
     public static final String ON_ROOM_CREATED = "ON_ROOM_CREATED";
 
     public static final String ON_USER_LIST = "ON_USER_LIST";

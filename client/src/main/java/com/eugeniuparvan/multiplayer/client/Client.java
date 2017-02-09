@@ -50,8 +50,6 @@ public class Client implements IClient {
     }
 
     public void stop() {
-        releaseResources();
-
         try {
             if (executor.awaitTermination(10, TimeUnit.SECONDS))
                 logger.info("Shutting down client: task completed");
@@ -62,6 +60,7 @@ public class Client implements IClient {
         } catch (InterruptedException e) {
             logger.error("client is stopped.", e);
         }
+        releaseResources();
     }
 
     @Override
